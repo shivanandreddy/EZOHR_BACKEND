@@ -15,6 +15,7 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Health Check Endpoint
 
