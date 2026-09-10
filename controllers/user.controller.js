@@ -3,31 +3,85 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 // POST: Register a new user
-export const register= async (req, res) => {
-  const { email, password, phone_number, user_type } = req.body;
-
+export const register = async (req, res) => {
   try {
-    // Check if user already exists
-    const existingUser = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
-    if (existingUser.rows.length > 0) {
-      return res.status(400).json({ error: 'Email already registered.' });
+    const {
+      name,
+      email,
+      password,
+      phone_number,
+      user_type
+    } = req.body;
+
+    if (!name || !email || !password || !user_type) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email, password and user_type are required"
+      });
+    }
+
+    const allowedUserTypes = ["student", "hr", "admin", "tutor"];
+
+    if (!allowedUserTypes.includes(user_type)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user_type"
+      });
+    }
+
+    // Check existing email
+    const existingUser = await pool.query(
+      `SELECT user_id FROM users WHERE email = $1`,
+      [email]
+    );
+
+    if (!existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "Email already registered"
+      });
     }
 
     // Hash password
-    const saltRounds = 10;
-    const password_hash = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Insert user
-    const newUser = await pool.query(
-      `INSERT INTO users (email, password_hash, phone_number, user_type)
-       VALUES ($1, $2, $3, $4)
-       RETURNING user_id, email, phone_number, user_type, created_at, is_active, is_mail_verified, is_mobile_verified`,
-      [email, password_hash, phone_number, user_type]
+    const result = await pool.query(
+      `INSERT INTO Users
+        (name, email, password, phone_number, user_type)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING
+        user_id,
+        name,
+        email,
+        phone_number,
+        user_type,
+        created_at,
+        updated_at,
+        is_active,
+        is_mail_verified,
+        is_mobile_verified`,
+      [
+        name,
+        email,
+        hashedPassword,
+        phone_number || null,
+        user_type
+      ]
     );
 
-    res.status(201).json(newUser.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(201).json({
+      success: true,
+      message: "User created successfully",
+      data: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error("Create User Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error"
+    });
   }
 };
 
