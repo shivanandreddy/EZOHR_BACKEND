@@ -1,5 +1,6 @@
 import pool from '../config/db.js';
 
+// POST: Add a new company
 export const addCompany = async (req, res) => {
   try {
     const { company_name, industry_type, website, location, description } = req.body;
@@ -38,6 +39,7 @@ export const addCompany = async (req, res) => {
   }
 };
 
+// GET: Fetch all companies
 export const getAllCompanies = async (req, res) => {
   try {
     const companies = await pool.query('SELECT * FROM company');
