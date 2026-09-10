@@ -19,7 +19,7 @@ app.get('/health', (req, res) => {
 
 // GET: Fetch all users
 app.get('/', async (req, res) => {
- res.status(200).json({ message: 'Welcome to the Ezohr API!' });
+ res.status(200).json({ message: 'Welcome to the Ezohr BackendAPI!' });
 });
 
 // POST: Add a new user
