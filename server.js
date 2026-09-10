@@ -2,8 +2,9 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import dotenv from "dotenv";
-import userRoutes from "./routes/user.routes.js";
 import pool from "./config/db.js";
+import userRoutes from "./routes/user.routes.js";
+import companyRoutes from "./routes/company.routes.js";
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.get("/", async (req, res) => {
 });
 
 app.use("/api/users", userRoutes);
+app.use("/api/companies", companyRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
