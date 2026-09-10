@@ -4,7 +4,7 @@ services:
     env: node
     plan: free
     buildCommand: npm install
-    startCommand: node index.js # Change to your entry file (e.g., node server.js or npm start)
+    startCommand: node server.js # Change to your entry file (e.g., node server.js or npm start)
     envVars:
       - key: PORT
         value: 10000
