@@ -1,0 +1,79 @@
+-- 1. User (Base Authentication Table)
+CREATE TABLE Users (
+    user_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password_hash VARCHAR(255) NOT NULL,
+    phone_number VARCHAR(20),
+    user_type VARCHAR(20) NOT NULL CHECK (user_type IN ('STUDENT', 'HR', 'ADMIN')),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active BOOLEAN DEFAULT TRUE,
+    is_mail_verified BOOLEAN DEFAULT FALSE,
+    is_mobile_verified BOOLEAN DEFAULT FALSE
+);
+
+-- 2. Company Table
+CREATE TABLE Company (
+    company_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    company_name VARCHAR(255) NOT NULL,
+    industry_type VARCHAR(100),
+    website VARCHAR(255),
+    location VARCHAR(255),
+    description TEXT,
+    verified_status BOOLEAN DEFAULT FALSE
+);
+
+-- 3. HR (Recruiter Profile Table)
+CREATE TABLE HR (
+    hr_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL UNIQUE,
+    company_id UUID NOT NULL,
+    designation VARCHAR(100),
+    department VARCHAR(100),
+    CONSTRAINT fk_hr_user FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
+    CONSTRAINT fk_hr_company FOREIGN KEY (company_id) REFERENCES Company(company_id) ON DELETE CASCADE
+);
+
+-- 4. Student (Job Seeker Profile Table)
+CREATE TABLE Student (
+    student_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID NOT NULL UNIQUE,
+    full_name VARCHAR(150) NOT NULL,
+    degree VARCHAR(100),
+    passing_year INT,
+    skills TEXT,
+    experience_years DECIMAL(3, 1) DEFAULT 0.0,
+    resume_url VARCHAR(500),
+    expected_salary INT,
+    current_salary INT,
+    CONSTRAINT fk_student_user FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+);
+
+-- 5. Job (Job Listing Table)
+CREATE TABLE Job (
+    job_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    company_id UUID NOT NULL,
+    hr_id UUID NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    job_description TEXT,
+    location VARCHAR(100),
+    salary_min DECIMAL(10, 2),
+    salary_max DECIMAL(10, 2),
+    job_type VARCHAR(20) NOT NULL CHECK (job_type IN ('FULL_TIME', 'PART_TIME', 'INTERNSHIP')),
+    status VARCHAR(20) DEFAULT 'DRAFT' CHECK (status IN ('OPEN', 'CLOSED', 'DRAFT')),
+    posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_job_company FOREIGN KEY (company_id) REFERENCES Company(company_id) ON DELETE CASCADE,
+    CONSTRAINT fk_job_hr FOREIGN KEY (hr_id) REFERENCES HR(hr_id) ON DELETE CASCADE
+);
+
+-- 6. Student_Applied_Job (Junction Table)
+CREATE TABLE Student_Applied_Job (
+    application_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    job_id UUID NOT NULL,
+    student_id UUID NOT NULL,
+    applied_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(20) DEFAULT 'APPLIED' CHECK (status IN ('APPLIED', 'SHORTLISTED', 'INTERVIEWED', 'REJECTED', 'HIRED')),
+    resume_version VARCHAR(500),
+    CONSTRAINT fk_app_job FOREIGN KEY (job_id) REFERENCES Job(job_id) ON DELETE CASCADE,
+    CONSTRAINT fk_app_student FOREIGN KEY (student_id) REFERENCES Student(student_id) ON DELETE CASCADE,
+    CONSTRAINT unique_student_job UNIQUE (student_id, job_id)
+);

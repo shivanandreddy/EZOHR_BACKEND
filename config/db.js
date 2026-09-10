@@ -14,14 +14,6 @@ const pool = new Pool({
     : false,
 });
 
-// Test Database Connection
-pool.connect()
-  .then((client) => {
-    console.log('Connected to Render PostgreSQL successfully!');
-    client.release();
-  })
-  .catch((err) => {
-    console.error('PostgreSQL connection error:', err.message);
-  });
+
 
 export default pool;
