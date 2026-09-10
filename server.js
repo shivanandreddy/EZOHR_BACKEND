@@ -17,13 +17,11 @@ app.use(morgan("dev"));
 app.use(express.json());
 
 // Health Check Endpoint
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "OK", message: "Server is running" });
-});
+
 
 // GET: Fetch all users
 app.get("/", async (req, res) => {
-  res.status(200).json({ message: "Welcome to the Ezohr BackendAPI!" });
+  res.status(200).send("Welcome to the Ezohr BackendAPI!" );
 });
 
 app.use("/api/users", userRoutes);
