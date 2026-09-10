@@ -18,13 +18,8 @@ app.get('/health', (req, res) => {
 });
 
 // GET: Fetch all users
-app.get('/api/users', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM users');
-    res.json(result.rows);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+app.get('/', async (req, res) => {
+ res.status(200).json({ message: 'Welcome to the Ezohr API!' });
 });
 
 // POST: Add a new user
