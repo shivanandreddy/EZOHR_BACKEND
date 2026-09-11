@@ -1,16 +1,21 @@
 -- 1. User (Base Authentication Table)
 CREATE TABLE Users (
-    user_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     name VARCHAR(64) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     phone_number VARCHAR(20),
-    user_type VARCHAR(20) NOT NULL CHECK (user_type IN ('student', 'hr', 'admin','tutor')),
+    user_type VARCHAR(20) NOT NULL CHECK (user_type IN ('user', 'student', 'hr', 'admin', 'tutor', 'employee', 'recruiter', 'hr_admin', 'intern', 'freelancer')) ,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_active BOOLEAN DEFAULT TRUE,
     is_mail_verified BOOLEAN DEFAULT FALSE,
-    is_mobile_verified BOOLEAN DEFAULT FALSE
+    is_mobile_verified BOOLEAN DEFAULT FALSE,
+    aadhar_number CHAR(12) CHECK (aadhar_number ~ '^[0-9]{12}$'),
+    pan_card CHAR(10) CHECK (pan_card ~ '^[A-Z]{5}[0-9]{4}[A-Z]{1}$')
+    is_adhar_verified BOOLEAN DEFAULT FALSE,
+    is_pan_verified BOOLEAN DEFAULT FALSE,
+    
 );
 
 -- 2. Company Table
@@ -71,7 +76,7 @@ CREATE TABLE Candiate (
     highest_qualification VARCHAR(100),         -- e.g., "Bachelor of Technology"
     field_of_study VARCHAR(100),                -- e.g., "Computer Science"
     institution_name VARCHAR(150),
-    passing_year INT,
+    passed_out_year INT,
     
     -- Skills & Bio
     summary TEXT,
