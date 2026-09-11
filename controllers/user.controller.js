@@ -25,7 +25,7 @@ export const register = async (req, res) => {
 
     // Check existing email
     const existingUser = await pool.query(
-      `SELECT user_id FROM users WHERE email = $1`,
+      `SELECT id FROM users WHERE email = $1`,
       [email],
     );
 
@@ -44,7 +44,7 @@ export const register = async (req, res) => {
         (name, email, password, phone_number, user_type)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING
-        user_id,
+        id,
         name,
         email,
         phone_number,
@@ -87,28 +87,39 @@ export const login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // Check if user exists
-    const user = await pool.query("SELECT * FROM users WHERE email = $1", [
-      email,
-    ]);
-    if (user.rows.length === 0) {
+    // 1. Fetch user from PostgreSQL
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    if (result.rows.length === 0) {
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
-    // Check password
-    const passwordMatch = await bcrypt.compare(password, user.rows[0].password);
+    const user = result.rows[0];
+
+    // 2. Validate password
+    const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
-    // Generate JWT token
-    const token = jwt.sign(
-      { user_id: user.rows[0].user_id },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" },
-    );
+    // 3. Define JWT Payload (Synced with middleware)
+    const payload = {
+      id: user.user_id,
+      email: user.email,
+      role: user.user_type
+    };
 
-    res.status(200).json({ token });
+    // 4. Sign JWT Token
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+    // 5. Structure JSON response
+    const userData = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.user_type
+    };
+
+    res.status(200).json({ token, user: userData });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

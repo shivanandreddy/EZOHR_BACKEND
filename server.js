@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 
 
 // GET: Fetch all users
-app.get("/", async (req, res) => {
+app.get("/api", async (req, res) => {
   res.status(200).send("Welcome to the Ezohr BackendAPI!" );
 });
 

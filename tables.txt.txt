@@ -35,19 +35,54 @@ CREATE TABLE HR (
     CONSTRAINT fk_hr_company FOREIGN KEY (company_id) REFERENCES Company(company_id) ON DELETE CASCADE
 );
 
--- 4. Student (Job Seeker Profile Table)
-CREATE TABLE Student (
-    student_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+-- 4. Candiate (Candiate Profile Table)
+CREATE TABLE Candiate (
+    job_seeker_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL UNIQUE,
+    
+    -- Candidate Classification (Inline ENUM alternative)
+    type VARCHAR(20) NOT NULL DEFAULT 'student' CHECK (type IN ('student', 'employee')),
+    
+    -- Personal & Identification Details
     full_name VARCHAR(150) NOT NULL,
-    degree VARCHAR(100),
-    passing_year INT,
-    skills TEXT,
-    experience_years DECIMAL(3, 1) DEFAULT 0.0,
+    headline VARCHAR(255),                      -- e.g., "Software Developer" or "CS Undergrad"
+    phone_number VARCHAR(20),
+    profile_picture_url VARCHAR(500),
+    
+    -- Location Details
+    city VARCHAR(100),
+    state VARCHAR(100),
+    country VARCHAR(100),
+    
+    -- Professional Links & Documents
     resume_url VARCHAR(500),
-    expected_salary INT,
-    current_salary INT,
-    CONSTRAINT fk_student_user FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
+    portfolio_url VARCHAR(500),
+    linkedin_url VARCHAR(500),
+    github_url VARCHAR(500),
+    
+    -- Career & Status Attributes
+    experience_years DECIMAL(3, 1) DEFAULT 0.0,
+    current_status VARCHAR(50) DEFAULT 'open_to_work', -- e.g., 'employed', 'unemployed', 'studying'
+    notice_period_days INT DEFAULT 0,
+    expected_salary NUMERIC(12, 2),
+    current_salary NUMERIC(12, 2),
+    
+    -- Education Details
+    highest_qualification VARCHAR(100),         -- e.g., "Bachelor of Technology"
+    field_of_study VARCHAR(100),                -- e.g., "Computer Science"
+    institution_name VARCHAR(150),
+    passing_year INT,
+    
+    -- Skills & Bio
+    summary TEXT,
+    skills TEXT[],                              -- Postgres Array (e.g., ARRAY['Java', 'SQL'])
+
+    -- Timestamps
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+
+    -- Foreign Key Constraint
+    CONSTRAINT fk_jobseeker_user FOREIGN KEY (user_id) REFERENCES Users(user_id) ON DELETE CASCADE
 );
 
 -- 5. Job (Job Listing Table)
@@ -67,8 +102,8 @@ CREATE TABLE Job (
     CONSTRAINT fk_job_hr FOREIGN KEY (hr_id) REFERENCES HR(hr_id) ON DELETE CASCADE
 );
 
--- 6. Student_Applied_Job (Junction Table)
-CREATE TABLE Student_Applied_Job (
+-- 6. Candiate_Applied_Job (Junction Table)
+CREATE TABLE Candiate_Applied_Job (
     application_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     job_id UUID NOT NULL,
     student_id UUID NOT NULL,
@@ -79,3 +114,4 @@ CREATE TABLE Student_Applied_Job (
     CONSTRAINT fk_app_student FOREIGN KEY (student_id) REFERENCES Student(student_id) ON DELETE CASCADE,
     CONSTRAINT unique_student_job UNIQUE (student_id, job_id)
 );
+
